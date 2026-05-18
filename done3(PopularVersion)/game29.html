@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我要成為地政王！</title>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VH6VR08KG4"></script>
+<script>
+  window.dataLayer = window.dataLayer ||[];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-VH6VR08KG4');
+</script>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', 'Heiti TC', sans-serif;
+            background-color: #fcefdc;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            height: 100vh; /* 強制滿版 */
+            overflow: hidden; /* 禁止整個網頁捲動 */
+            user-select: none;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 500px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 25px rgba(0,0,0,0.15);
+            position: relative;
+            height: 100%; /* 確保容器填滿高度 */
+        }
+
+        /* --- 1. 封面頁 (Landing Screen) --- */
+        #screen-landing {
+            /* 請將您的圖片命名為 cover.jpg 並放在同目錄，或替換下方網址 */
+            background-image: url('cover.jpg'); 
+            background-size: cover;     /* 圖片填滿 */
+            background-position: center; /* 圖片置中 */
+            background-repeat: no-repeat;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex; /* 預設顯示 */
+            flex-direction: column;
+            justify-content: flex-end; /* 按鈕靠下 */
+            align-items: center;
+            padding-bottom: 50px; /* 按鈕距離底部 */
+            box-sizing: border-box;
+        }
+        
+        /* 進入遊戲按鈕特效 */
+        .btn-enter {
+            background: linear-gradient(to bottom, #f1c40f, #f39c12);
+            color: #5c3506;
+            font-size: 28px;
+            font-weight: 900;
+            padding: 15px 60px;
+            border-radius: 50px;
+            border: 4px solid #fff;
+            box-shadow: 0 6px 0 #d35400, 0 10px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.1s;
+            animation: pulse 1.5s infinite; /* 呼吸燈特效 */
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+        }
+        .btn-enter:active {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 #d35400;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- 通用畫面設定 --- */
+        .screen {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            display: none; /* 預設隱藏 */
+            height: 100%;
+            box-sizing: border-box;
+        }
+        .active { display: flex; animation: fadeIn 0.4s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* --- Header (緊湊版) --- */
+        .header {
+            background: #e67e22;
+            color: white;
+            padding: 8px 10px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 14px;
+            border-bottom: 4px solid #d35400;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+        .stat-box { text-align: center; width: 33%; }
+        .stat-value { font-size: 20px; font-weight: bold; margin-top: 2px; }
+
+        /* --- 內容元素 --- */
+        h2 { margin: 10px 0; color: #d35400; font-size: 26px; line-height: 1.2; flex-shrink: 0; }
+        
+        h3 { margin: 2px 0 5px 0; color: #2c3e50; font-size: 22px; font-weight: bold; flex-shrink: 0; }
+        
+        .npc-img { 
+            width: 70px; height: 70px; 
+            background: #ffeaa7; 
+            border-radius: 50%; 
+            margin: 5px 0 10px 0; 
+            line-height: 70px; 
+            font-size: 40px; 
+            border: 3px solid #f39c12; 
+            flex-shrink: 0;
+        }
+
+        /* --- 敘述框 (通用) --- */
+        .desc { 
+            margin-bottom: 5px; 
+            line-height: 1.5; 
+            color: #444; 
+            background: #fff8e1;
+            padding: 12px; 
+            border-radius: 10px; 
+            width: 100%; 
+            border: 2px solid #ffe0b2;
+            box-sizing: border-box;
+            font-weight: bold;
+        }
+
+        /* --- 特例調整：第二頁 (Intro) 的敘述框 --- */
+        #intro-desc {
+            font-size: 22px; 
+            max-height: none; 
+            overflow: visible; 
+            flex-grow: 0; 
+            height: auto; 
+            background: #fff8e1;
+            border: 2px solid #ffe0b2;
+            margin-top: 10px;
+            margin-bottom: 30px; 
+            padding: 20px;
+        }
+
+        /* --- 特例調整：第三頁 (Game) 的敘述框 --- */
+        #q-desc {
+            font-size: 20px; 
+            max-height: 25vh; 
+            overflow-y: auto;
+            margin-bottom: 5px; 
+        }
+        
+        /* --- 按鈕區 --- */
+        #choices-container { 
+            width: 100%; 
+            margin-bottom: 5px; 
+            flex: 1; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* 按鈕群置中 */
+        }
+        
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 15px; 
+            padding-right: 50px; 
+            margin: 5px 0; 
+            width: 100%;
+            border-radius: 10px;
+            font-size: 20px; 
+            line-height: 1.3;
+            cursor: pointer;
+            box-shadow: 0 4px #2980b9;
+            position: relative;
+            text-align: left;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 0 #2980b9; }
+        
+        .btn-correct { background: #27ae60 !important; box-shadow: 0 4px #219150 !important; }
+        .btn-wrong { background: #c0392b !important; box-shadow: 0 4px #a93226 !important; opacity: 0.6; }
+        .btn-disabled { pointer-events: none; }
+
+        .btn-start {
+            text-align: center;
+            font-size: 24px;
+            background: #e67e22;
+            box-shadow: 0 5px #d35400;
+            padding: 15px;
+            margin-top: 5px;
+            padding-right: 15px;
+            flex-shrink: 0;
+            width: 100%;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer; 
+        }
+
+        /* --- 印章特效 --- */
+        .stamp-seal {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            margin-top: -20px;
+            width: 70px;
+            height: 40px;
+            border: 3px solid #c0392b;
+            color: #c0392b;
+            font-size: 20px;
+            font-weight: 900;
+            line-height: 35px;
+            text-align: center;
+            border-radius: 6px;
+            background: transparent;
+            transform: rotate(-20deg) scale(2);
+            opacity: 0;
+            z-index: 100;
+            font-family: "KaiTi", "BiauKai", serif; 
+            pointer-events: none;
+            animation: stampIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes stampIn { to { opacity: 1; transform: rotate(-20deg) scale(1); } }
+        
+        /* --- 浮動文字 --- */
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 30px;
+            text-shadow: 2px 2px 0 #fff;
+            animation: floatUp 1.5s ease-out forwards;
+            pointer-events: none;
+            z-index: 200;
+            width: 100%;
+            text-align: center;
+            left: 0;
+        }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-80px); opacity: 0; } }
+
+        /* --- 進度條 --- */
+        .progress-bar {
+            width: 100%; height: 8px; background: #eee; margin-top: 5px; border-radius: 4px; flex-shrink: 0;
+        }
+        .progress-fill { height: 100%; background: #e67e22; width: 0%; border-radius: 4px; transition: width 0.3s; }
+
+        /* --- 結算頁面圖片專用樣式 --- */
+        #result-img {
+            max-width: 100%; 
+            max-height: 50vh; 
+            object-fit: contain; /* 保持圖片比例 */
+            margin: 10px 0;
+            border-radius: 8px;
+            display: none; /* 預設隱藏，由JS開啟 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<!-- 加入音訊元件 -->
+<audio id="audio-start" src="start.mp3"></audio>
+<audio id="audio-bgm" src="bgm.mp3" loop></audio>
+<audio id="audio-right" src="right.mp3"></audio>
+<audio id="audio-wrong" src="wrong.mp3"></audio>
+
+<div id="game-container">
+    <!-- 1. 封面頁 (Entry Interface) -->
+    <div id="screen-landing">
+        <button class="btn-enter" onclick="goToIntro()">進入遊戲</button>
+    </div>
+
+    <!-- 2. 遊戲說明頁 -->
+    <div id="screen-start" class="screen" style="justify-content: flex-start;">
+        <div class="header" style="width:100%; box-sizing:border-box;">
+            <div class="stat-box"><div class="stat-label">專業度</div><span class="stat-value">0</span></div>
+            <div class="stat-box"><div class="stat-label">信賴度</div><span class="stat-value">0</span></div>
+            <div class="stat-box"><div class="stat-label">回合</div><span class="stat-value">0/8</span></div>
+        </div>
+
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; width:100%; align-items:center;">
+            <div class="npc-img" style="width:60px; height:60px; line-height:60px; font-size:30px; margin: 5px 0;">🥭</div>
+            <h2>★ 我要成為地政王!! ★</h2>
+            
+            <div class="desc" id="intro-desc">
+                歡迎來到「芒果不動產事務所」！<br><br>
+                老闆去玉井買芒果了，留下一堆客人給你處理。<br>
+                你能歷經挑戰成為地政王嗎?<br>
+                還是包袱款款回家吃自己?
+                <br><br>
+                <span style="color:#d35400; font-size: 18px;">貼心提醒: 憑實力作答，選錯不能重來喔！</span>
+            </div>
+            
+            <button class="btn btn-start" onclick="startGame()">開始上班</button>
+        </div>
+    </div>
+
+    <!-- 3. 遊戲進行畫面 -->
+    <div id="screen-game" class="screen">
+        <div class="header" style="width:110%; margin-top:-15px; margin-bottom:5px;">
+            <div class="stat-box"><div class="stat-label">專業度</div><span id="stat-pro" class="stat-value">0</span></div>
+            <div class="stat-box"><div class="stat-label">信賴度</div><span id="stat-stress" class="stat-value">0</span></div>
+            <div class="stat-box"><div class="stat-label">進度</div><span id="stat-round" class="stat-value">1/8</span></div>
+        </div>
+
+        <div class="npc-img" id="npc-avatar" style="width:60px; height:60px; line-height:60px; font-size:35px; margin: 2px 0 5px 0;">👤</div>
+        <h3 id="q-title">事件標題</h3>
+        
+        <div class="desc" id="q-desc">事件描述...</div>
+        
+        <div id="choices-container">
+            <!-- 按鈕由 JS 生成 -->
+        </div>
+
+        <div id="feedback-box"></div>
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+    </div>
+
+    <!-- 4. 結算畫面 (移除按鈕) -->
+    <div id="screen-result" class="screen">
+        <div class="header" style="width:110%; margin-top:-15px;">
+            <div class="stat-box">結算</div>
+        </div>
+        
+        <!-- Emoji 頭像 (預設顯示，JS會隱藏它) -->
+        <div class="npc-img" id="result-avatar">🏆</div>
+        
+        <h2 id="result-title">結局標題</h2>
+        <div class="desc" id="result-desc" style="font-size: 18px; max-height: 15vh; overflow-y: auto;">結局描述</div>
+        
+        <!-- 結局圖片容器 -->
+        <img id="result-img" src="" alt="結局圖片">
+        
+        <p style="font-size:20px; color:#d35400; font-weight:bold; margin-top:5px; flex-shrink:0;" id="result-score">最終得分：0</p>
+    </div>
+</div>
+
+<script>
+    // 遊戲狀態 (初始設定為 0)
+    let stats = { pro: 0, stress: 0, round: 1 };
+    const maxRounds = 8;
+    let currentCorrectChoice = null;
+
+    // --- 題庫資料 (已修改: 答錯不倒扣，effect 改為 0) --- 
+    const questionsPool =[
+        {
+            title: "Q1. 不動產說明書-1",
+            desc: "什麼是「不動產說明書」?",
+            avatar: "🤔",
+            correct: { text: "「不動產說明書」是指不動產仲介業者於產權調查後，在成交不動產之前提供給買方的法律文件。", effect: {pro: 10, stress: 10}, msg: "沒錯！不動產說明書堪稱房子的「履歷表」!" },
+            wrongs:[
+                { text: "「不動產說明書」是不動產仲介業者用來美化房屋、吸引買家的宣傳文案，內容可以依行銷需求自由編寫，並不需要負責真實性。", effect: {pro: 0, stress: 0}, msg: "大錯特錯!不動產說明書的內容視為買賣契約的一部分，若內容不實，買方可據此主張權利。" }
+                    ]
+        },
+        {
+            title: "Q2. 不動產說明書-2",
+            desc: "「不動產說明書」存在的目的是什麼?",
+            avatar: "🧐",
+            correct: { text: "讓買方清楚了解房屋資訊，保障交易安全", effect: {pro: 10, stress: 10}, msg: "專業！這可是保護你荷包的重要文件！" },
+            wrongs:[
+                { text: "只是形式文件，沒有實際用途", effect: {pro: 0, stress: 0}, msg: "不看這個就買房？你是用勇氣在置產嗎🤣" }
+                     ]
+        },
+        {
+            title: "Q3. 不動產說明書-3",
+            desc: "「不動產說明書」的內容有什麼?",
+            avatar: "💬",
+            correct: { text: "應包含交易權利種類、交易價格、現況、用途、瑕疵等重要資訊", effect: {pro: 10, stress: 10}, msg: "對啦!除了優點，所有的地雷也要說清楚！" },
+            wrongs:[
+                { text: "只寫交易價格和坪數就好", effect: {pro: 0, stress: 0}, msg: "其他不寫，是要開盲盒嗎？🎲" }
+                           ]
+        },
+        {
+            title: "Q4. 不動產說明書-4",
+            desc: "內政部115年4月1日起公告修正新版「不動產說明書」包含什麼呢?",
+            avatar: "🛡️",
+            correct: { text: "新版不動產說明書應揭露事項包含：有無取得建物能效標示、有無設置太陽光電發電設備、交屋時有無檢附氯離子檢測報告", effect: {pro: 20, stress: 20}, msg: "正確！新制就是要你看得更清楚！" },
+            wrongs:[
+                { text: "只是改版面，內容沒差", effect: {pro: 0, stress: 0}, msg: "你以為只是換皮，其實內容整個進化了🧬" }
+                           ]
+        },
+        {
+            title: "Q5. 成屋買賣定型化契約-1",
+            desc: "什麼是「成屋買賣定型化契約」?",
+            avatar: "🤨",
+            correct: { text: "是內政部為了保障消費者購屋權益、維護不動產交易公平所規範的成屋買賣契約書格式", effect: {pro: 10, stress: 10}, msg: "官方版本，安心服用👍" },
+            wrongs:[
+                { text: "是房仲自己設計的合約，內容不一定有保障", effect: {pro: 0, stress: 0}, msg: "如果真是這樣，那就真的要緊張了😨" }
+                           ]
+        },
+        {
+            title: "Q6. 成屋買賣定型化契約-2",
+            desc: "「成屋買賣定型化契約」的內容有什麼?",
+            avatar: "🤷‍♀️",
+            correct: { text: "契約應載明不動產價格、付款方式、違約處理方式等，避免爭議", effect: {pro: 10, stress: 10}, msg: "不寫清楚，小心後患無窮~😨" },
+            wrongs:[
+                { text: "寫一下買方跟賣方是誰就好，不動產方面的資料不用寫太多啦", effect: {pro: 0, stress: 0}, msg: "這不是網購，不要到貨才驚嚇😱" }
+                           ]
+        },
+        {
+            title: "Q7. 成屋買賣定型化契約-3",
+            desc: "內政部115年4月1日起公告修正新版「成屋買賣定型化契約」包含什麼呢?",
+            avatar: "📜",
+            correct: { text: "應揭露不動產是否有自來水加壓受水設備及太陽光電設備資訊，並增列硬固混凝土氯離子含量標準", effect: {pro: 20, stress: 20}, msg: "這不僅是升級，更直接幫你把地雷標出來!💣" },
+            wrongs:[
+                { text: "只是版面變漂亮，內容沒差", effect: {pro: 0, stress: 0}, msg: "不不，內容不但升級，更是在幫你「先排雷再成交」💣" }
+                          ]
+        },
+        {
+            title: "Q8.成屋買賣定型化契約VS不動產說明書",
+            desc: "成屋買賣定型化契約與不動產說明書的差異？",
+            avatar: "👀",
+            correct: { text: "「成屋買賣定型化契約」是規範買賣雙方權利義務的「契約文件」；「不動產說明書」是提供房屋重要資訊的「資訊揭露文件」", effect: {pro: 10, stress: 10}, msg: "正確！一個管「怎麼買」，一個負責「買之前先看清楚」" },
+            wrongs:[
+                { text: "成屋定型化契約與不動產說明書是相同文件，功能與內容沒有差別。", effect: {pro: 0, stress: 0}, msg: "錯！這樣想的話，契約跟菜單大概也差不多了。" }
+            ]
+        }
+            ];
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function updateStats() {
+        document.getElementById('stat-pro').innerText = stats.pro;
+        document.getElementById('stat-stress').innerText = stats.stress;
+        document.getElementById('stat-round').innerText = stats.round + "/" + maxRounds;
+        let pct = ((stats.round - 1) / maxRounds) * 100;
+        document.getElementById('progress-fill').style.width = pct + "%";
+    }
+
+    function showFloatingText(text, color) {
+        const el = document.createElement('div');
+        el.className = 'floating-text';
+        el.innerText = text;
+        el.style.color = color;
+        el.style.top = '30%'; 
+        document.getElementById('game-container').appendChild(el);
+        setTimeout(() => el.remove(), 1500);
+    }
+
+    function goToIntro() {
+        const startAudio = document.getElementById('audio-start');
+        startAudio.play().catch(e => console.log("音訊播放被瀏覽器阻擋", e));
+        document.getElementById('screen-landing').style.display = 'none';
+        document.getElementById('screen-start').classList.add('active');
+    }
+
+    function startGame() {
+        const startAudio = document.getElementById('audio-start');
+        const bgmAudio = document.getElementById('audio-bgm');
+        startAudio.pause();
+        startAudio.currentTime = 0;
+        bgmAudio.play().catch(e => console.log("音訊播放被瀏覽器阻擋", e));
+        document.getElementById('screen-start').classList.remove('active');
+        document.getElementById('screen-start').style.display = 'none';
+        document.getElementById('screen-game').classList.add('active');
+        stats = { pro: 0, stress: 0, round: 1 };
+        updateStats();
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (stats.round > maxRounds) {
+            endGame();
+            return;
+        }
+        const feedbackBox = document.getElementById('feedback-box');
+        feedbackBox.style.display = 'none';
+        feedbackBox.innerHTML = '';
+        const q = questionsPool[stats.round - 1];
+        currentCorrectChoice = q.correct;
+        document.getElementById('q-title').innerText = q.title;
+        document.getElementById('q-desc').innerText = q.desc;
+        document.getElementById('q-desc').scrollTop = 0;
+        document.getElementById('npc-avatar').innerText = q.avatar;
+        const cContainer = document.getElementById('choices-container');
+        cContainer.innerHTML = '';
+        let currentChoices =[];
+        let correctChoice = JSON.parse(JSON.stringify(q.correct));
+        correctChoice.isCorrect = true;
+        currentChoices.push(correctChoice);
+        let shuffledWrongs = shuffleArray([...q.wrongs]);
+        let selectedWrongs = shuffledWrongs.slice(0, 2);
+        selectedWrongs.forEach(w => {
+            w.isCorrect = false;
+            currentChoices.push(w);
+        });
+        currentChoices = shuffleArray(currentChoices);
+        currentChoices.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.innerText = c.text;
+            btn.dataset.isCorrect = c.isCorrect;
+            btn.onclick = (e) => makeChoice(c, e.currentTarget);
+            cContainer.appendChild(btn);
+        });
+    }
+
+    function makeChoice(choice, btnElement) {
+        // 音效處理
+        const rightAudio = document.getElementById('audio-right');
+        const wrongAudio = document.getElementById('audio-wrong');
+
+        if (choice.isCorrect) {
+            rightAudio.currentTime = 0;
+            rightAudio.play().catch(e => console.log("音效播放失敗", e));
+        } else {
+            wrongAudio.currentTime = 0;
+            wrongAudio.play().catch(e => console.log("音效播放失敗", e));
+        }
+
+        // 鎖定按鈕
+        const allBtns = document.querySelectorAll('.btn');
+        let correctBtnElement = null;
+        allBtns.forEach(btn => {
+            btn.classList.add('btn-disabled');
+            if(btn.dataset.isCorrect === "true") {
+                btn.classList.add('btn-correct');
+                correctBtnElement = btn;
+            }
+        });
+
+        if(correctBtnElement) {
+            const stamp = document.createElement('div');
+            stamp.className = 'stamp-seal';
+            stamp.innerText = '正解';
+            correctBtnElement.appendChild(stamp);
+        }
+
+        if (!choice.isCorrect) {
+            btnElement.classList.add('btn-wrong');
+        }
+
+        stats.pro += choice.effect.pro;
+        stats.stress += choice.effect.stress;
+        const color = choice.effect.pro > 0 ? '#27ae60' : '#e74c3c';
+        const sign = choice.effect.pro > 0 ? '+' : '';
+        showFloatingText(`專業 ${sign}${choice.effect.pro}`, color);
+        updateStats();
+
+        setTimeout(() => {
+            alert(choice.msg);
+            stats.round++;
+            loadQuestion();
+        }, 500);
+    }
+
+    function endGame() {
+        document.getElementById('screen-game').classList.remove('active');
+        document.getElementById('screen-game').style.display = 'none';
+        document.getElementById('screen-result').classList.add('active');
+        const rTitle = document.getElementById('result-title');
+        const rDesc = document.getElementById('result-desc');
+        const rAvatar = document.getElementById('result-avatar');
+        const rScore = document.getElementById('result-score');
+        const rImg = document.getElementById('result-img');
+        rScore.innerText = `最終專業度：${stats.pro} | 信賴度：${stats.stress}`;
+        rAvatar.style.display = 'none';
+        rImg.style.display = 'block';
+
+        // 結算邏輯已更新：60分以上地政王，40-50分王牌經紀人，30分以下迷糊小同事
+        if (stats.pro >= 60) {
+            rTitle.innerText = "結局：恭喜成為地政王";
+            rDesc.innerText = "太神了！你對成屋買賣制度的了解比玉井芒果還熟！老闆決定送你一整籃頂級愛文芒果！";
+            rImg.src = "01.jpg"; 
+        } else if (stats.pro >= 40) {
+            rTitle.innerText = "結局：王牌不動產經紀人";
+            rDesc.innerText = "表現優異！雖然偶爾會被小問題困擾，但你是事務所不可或缺的戰力。";
+            rImg.src = "02.jpg"; 
+        } else {
+            // 包含 30 分及以下
+            rTitle.innerText = "結局：迷糊小同事"; 
+            rDesc.innerText = "錯誤百出，客戶都跑光了。老闆嘆氣說：「你還是回鄉下幫忙採收芒果吧...」";
+            rImg.src = "03.jpg"; // 原 03 或 04 圖片皆可，此處統一使用 03
+        }
+    }
+</script>
+
+</body>
+</html>
